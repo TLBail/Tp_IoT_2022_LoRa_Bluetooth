@@ -9,11 +9,8 @@
 #define SS 18
 #define RST 14
 #define DI0 26
-/*
-#define freq 868.5E6
-#define sf 8
-#define sb 125E3
-*/
+
+#define MQTT_TOPIC "tp_popo/BIPBOUP"
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -37,7 +34,7 @@ void setup() {
 
     LoRa.receive();
 
-    WiFi.begin("*", "*");
+    WiFi.begin("ReseauLilian", "cortux2003");
 
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print('.');
@@ -50,8 +47,9 @@ void setup() {
     mqttClient.setServer("test.mosquitto.org", 1883);
     mqttClient.setCallback(onMqttReceive);
 
+
     while (!mqttClient.connected()) {
-        if (mqttClient.connect("esp32-corto-lilian")) {
+        if (mqttClient.connect("esp32-thomas-theo")) {
             Serial.println("MQTT client connected");
         }
         else {
@@ -63,13 +61,13 @@ void setup() {
         }
     }
 
-    mqttClient.publish("tp_popo/alban", "mqtt client connected corto/lilian");
-
-    mqttClient.subscribe("tp_popo/BIPBOUP");
+    mqttClient.subscribe(MQTT_TOPIC);
 }
 
 void onLoraReceive(int packetSize) {
     uint8_t buf[24];
+
+    Serial.println("LoRa Receive");
 
     for (int i = 0; i < packetSize; i++) {
         uint8_t c = LoRa.read();
@@ -84,43 +82,54 @@ void onLoraReceive(int packetSize) {
 
 bool lora_configured = false;
 
-void onMqttReceive(char* topic, uint8_t* payload, unsigned int length) {
-    lora_config conf;
+bool setup_lora(const lora_config& conf) {
+    Serial.print("conf.freq ");
+    Serial.println(conf.freq);
 
-    memcpy(&conf, payload, sizeof(lora_config));
+    Serial.print("conf.sf ");
+    Serial.println(conf.sf);
 
-    if (lora_configured) {
-        LoRa.end();
+    Serial.print("conf.sb ");
+    Serial.println(conf.sb);
 
-        lora_configured = false;
-    }
+    if (LoRa.begin(conf.freq)) {
+        LoRa.setSpreadingFactor(conf.sf);
+        LoRa.setSignalBandwidth(conf.sb);
 
-    if (!LoRa.begin(conf.freq)) {
-        Serial.println("LoRa failed");
+        Serial.println("Setup OK");
+
+        return true;
     }
     else {
-        Serial.println("LoRa setup done");
 
-        lora_configured = true;
-        Lora.
-
-            LoRa.setSpreadingFactor(conf.sf);
-        LoRa.setSignalBandwidth(conf.sb);
+        Serial.println("Setup KO");
+        return false;
     }
+}
+
+void onMqttReceive(char* topic, uint8_t* payload, unsigned int length) {
+    Serial.println("onMqttReceive");
+    lora_config conf;
+    memcpy(&conf, payload, sizeof(lora_config));
+
+    setup_lora(conf);
+
+    LoRa.beginPacket();
+    uint8_t packet[16] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
+    LoRa.write(packet, 16);
+    LoRa.endPacket();
+    LoRa.end();
+
+    delay(10000);
+
+    conf.freq = 868E6;
+    setup_lora(conf);
+
+    mqttClient.publish(MQTT_TOPIC, (uint8_t*)&conf, sizeof(lora_config));
 }
 
 void loop() {
     mqttClient.loop();
-
-    if (lora_configured) {
-        LoRa.beginPacket();
-
-        uint8_t packet[16] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
-
-        LoRa.write(packet, 16);
-
-        LoRa.endPacket();
-    }
 
     delay(2000);
 }

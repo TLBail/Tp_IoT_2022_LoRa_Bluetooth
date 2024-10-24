@@ -72,6 +72,6 @@ Ecoute avec le protocol Lora sur la fréquences envoyé.
 Affiche les données reçu. (normalement les valeurs de 1 à 16). 
 
 
-## 
-- Terminal 1
+## Echange Lora / MQTT et inversement entre 2 terminals
+- Terminal 1 : switcher.ino
 
