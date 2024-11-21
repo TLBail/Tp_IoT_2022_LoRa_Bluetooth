@@ -4,7 +4,7 @@
 ### Autheurs :
 
 - Théo LE BAIL
-- Thomas LEBRETTON
+- Thomas LEBRETON
 - Corto BEAU
 - Lilian FORGET
 
