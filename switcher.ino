@@ -10,7 +10,8 @@
 #define RST 14
 #define DI0 26
 
-#define MQTT_TOPIC "tp_popo/BIPBOUP"
+#define MY_TOPIC "tp_popo/client2"
+#define THEIR_TOPIC "tp_popo/client1"
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -22,7 +23,7 @@ struct lora_config {
 };
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
 
     pinMode(DI0, INPUT);
 
@@ -34,7 +35,7 @@ void setup() {
 
     LoRa.receive();
 
-    WiFi.begin("ReseauLilian", "cortux2003");
+    WiFi.begin("xxxx", "xxxxxx");
 
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print('.');
@@ -49,7 +50,7 @@ void setup() {
 
 
     while (!mqttClient.connected()) {
-        if (mqttClient.connect("esp32-thomas-theo")) {
+        if (mqttClient.connect("esp32-corto-lilian")) {
             Serial.println("MQTT client connected");
         }
         else {
@@ -61,7 +62,15 @@ void setup() {
         }
     }
 
-    mqttClient.subscribe(MQTT_TOPIC);
+    mqttClient.subscribe(THEIR_TOPIC);
+
+    lora_config conf;
+
+    conf.freq = 8686E5;
+    conf.sf = 8;
+    conf.sb = 125E3;
+
+    setup_lora(conf);
 }
 
 void onLoraReceive(int packetSize) {
@@ -74,7 +83,7 @@ void onLoraReceive(int packetSize) {
 
         buf[i++] = c;
 
-        Serial.print(c);
+        Serial.print((int)c);
     }
 
     Serial.println();
@@ -125,7 +134,7 @@ void onMqttReceive(char* topic, uint8_t* payload, unsigned int length) {
     conf.freq = 868E6;
     setup_lora(conf);
 
-    mqttClient.publish(MQTT_TOPIC, (uint8_t*)&conf, sizeof(lora_config));
+    mqttClient.publish(MY_TOPIC, (uint8_t*)&conf, sizeof(lora_config));
 }
 
 void loop() {
