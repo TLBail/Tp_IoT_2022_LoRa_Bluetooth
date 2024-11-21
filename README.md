@@ -119,12 +119,14 @@ Cependant, cela pose un problème : en effet, un client peut recevoir sa propre 
 La solution est donc d’utiliser des sujets différents pour chaque client, ce qui évite à un même client de recevoir ses propres paquets.
 
 ```c
+// switcher.ino
 #define MY_TOPIC “tp_popo/client1”
 #define THEIR_TOPIC “tp_popo/client2”
 ```
 
 On inverse donc simplement les deux valeurs sur l’autre client. On fait ensuite en sorte d’uniquement publier sur son propre topic et de s’inscrire au topic de l’autre :
 ```c
+// switcher.ino
 mqttClient.subscribe(THEIR_TOPIC);
 ...
 mqttClient.publish(MY_TOPIC, ...);
