@@ -3,8 +3,10 @@
 
 ### Autheurs :
 
-Théo LE BAIL
-Thomas LEBRETTON
+- Théo LE BAIL
+- Thomas LEBRETTON
+- Corto BEAU
+- Lilian FORGET
 
 ## Mise en place
 
@@ -33,7 +35,6 @@ Nous avons ensuite suivi le document du tp d'installation.
 
 Nous avons ensuite suivi le document du tp d'installation.
 [Document d'installation](http://www.smartcomputerlab.org/m5/IoT.Labs.base.fr.2020.jpg.pdf)
-
 
 ## Publication de données sur un serveur MQTT
 
